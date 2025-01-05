@@ -5,7 +5,7 @@ from .My_movetoPoint import my_moveToPoint
 
 def my_setUpState():
     root : Parallel = Parallel(name="Set Up tree",policy=py_trees.common.ParallelPolicy.SuccessOnAll())
-    numberOfRobot : int = 11
-    [root.add_child(my_moveToPoint(i,(-3273 + 500*i,-4464))) for i in range(numberOfRobot)]
+    numberOfRobot : int = 6
+    [root.add_child(my_moveToPoint(i,(-3151 + 500*i,-3121))) for i in range(numberOfRobot)]
     
     return root

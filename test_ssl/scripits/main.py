@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 from py_trees.composites import Sequence
-from tactick.My_movetoPoint import my_moveToPoint
+from tactic.My_movetoPoint import my_moveToPoint
 from py_trees.common import Status
-from tactick.My_setUpState import my_setUpState
+from tactic.My_setUpState import my_setUpState
 
 import py_trees
 import rospy

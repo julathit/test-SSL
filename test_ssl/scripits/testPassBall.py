@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 from py_trees.composites import Sequence
-from tactick.My_movetoPoint import my_moveToPoint
+from tactic.My_goToLineUp import my_goToLineUp
 from py_trees.common import Status
-from tactick.My_setUpState import my_setUpState
+from tactic.My_moveToBall import my_moveToBall
 
 import time
 import py_trees
@@ -11,10 +11,11 @@ import rospy
 def crateTree():
     root : Sequence = Sequence(name = "goToPoint" , memory=True)
 
-    goToP: my_moveToPoint = my_moveToPoint(0,(0,0))
+    goToL: my_goToLineUp = my_goToLineUp(1,0)
+    goTB : my_moveToBall = my_moveToBall(1)
 
-    root.add_child(my_setUpState())
-    root.add_child(goToP)
+    root.add_child(goToL)
+    root.add_child(goTB)
 
     return root
 
@@ -24,9 +25,6 @@ if __name__ == "__main__":
     tree = py_trees.trees.BehaviourTree(root)
 
     while not rospy.is_shutdown() and tree.root.status not in  [Status.SUCCESS,Status.FAILURE]:
-        start = time.time()
         tree.tick()
-        end = time.time()
-        print(f"{(end - start)*1,000,000} s")
     else:
         print("Success.")

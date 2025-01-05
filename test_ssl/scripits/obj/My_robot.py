@@ -10,7 +10,7 @@ from .My_ball import my_ball
 import math
 
 #number of robot
-n = 11
+n = 6
 
 #init ssl_msg
 ssl_msg = {i: SSL() for i in range(n)}
@@ -41,7 +41,7 @@ class my_robot:
         self.team = team
         self.ball = my_ball()
 
-    def __myRobotPosition(self) -> tuple:
+    def myRobotPosition(self) -> tuple:
         return (robot[self.robot_ID].x,robot[self.robot_ID].y)
 
     def __myRobotOrintation(self) -> float:
@@ -72,13 +72,12 @@ class my_robot:
         
         return False  
 
-    
     def rayHit(self) -> bool:
         num_of_robot = 11
         points = [(robot[i].x,robot[i].y) for i in range(num_of_robot) if i != self.robot_ID]
-        return self.__raycast(points,self.__myRobotPosition(),self.__myRobotOrintation(),300)
+        return self.__raycast(points,self.myRobotPosition(),self.__myRobotOrintation(),300)
     
-    def __sendCommand(self,x: float, y: float, z: float, kickPower: bool):
+    def sendCommand(self,x: float, y: float, z: float, kickPower: bool):
         
         ssl_msg[self.robot_ID].cmd_vel.angular.z = z
         ssl_msg[self.robot_ID].cmd_vel.linear.x = x
@@ -96,14 +95,14 @@ class my_robot:
             headingAngToBall += 2 * math.pi
 
         if self.__distanceToPoint(point) < 20:
-            self.__sendCommand(0,0,0,False)
+            self.sendCommand(0,0,0,False)
         elif abs(headingAngToBall) < 0.1:
-            self.__sendCommand(min(0.25*self.__distanceToPoint(point)+0.25,20),0,0,False)
+            self.sendCommand(min(0.25*self.__distanceToPoint(point)+0.25,20),0,0,False)
         elif abs(headingAngToBall) >= 0.1:
-            self.__sendCommand(0,0,3*headingAngToBall,False)
+            self.sendCommand(0,0,3*headingAngToBall,False)
         
-    def nearPoint(self,point : tuple) -> bool:
-        if self.__distanceToPoint(point) < 40:
+    def nearPoint(self,point : tuple,threshold = 40) -> bool:
+        if self.__distanceToPoint(point) < threshold:
             return True
         return False
 
@@ -117,7 +116,7 @@ class my_robot:
             headingAngToBall += 2 * math.pi
 
         if abs(headingAngToBall) >= 0.1:
-            self.__sendCommand(0,0,3*headingAngToBall,False)
+            self.sendCommand(0,0,3*headingAngToBall,False)
 
     def goToBall(self) -> None:
         self.goToPoint(self.ball.ballPosition())
@@ -126,5 +125,5 @@ class my_robot:
         self.faceToPoint(self.ball.ballPosition())
 
     def nearBall(self)-> bool:
-        self.nearPoint(self.ball.ballPosition())
+        return self.nearPoint(self.ball.ballPosition(),121)
 
