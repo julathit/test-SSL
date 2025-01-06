@@ -13,6 +13,8 @@ from .Robot import Robot
 class RobotManager:
     def __init__(self, nor: int, ball: Ball):
 
+        self.nor = nor
+
         def __updateRobotsData(data):
             for i in range(0, len(data.robots_blue)):
                 id_robots = data.robots_blue[i].robot_id
@@ -23,7 +25,7 @@ class RobotManager:
         self._robotDict: dict = {i: SSL_DetectionRobot() for i in range(nor)}
         self.sub = rospy.Subscriber("/vision", SSL_DetectionFrame, __updateRobotsData)
 
-        def __getUpdateRobotsData():
+        def __getUpdateRobotsData() -> dict:
             return self._robotDict
 
         self.ball: Ball = ball
@@ -31,3 +33,6 @@ class RobotManager:
 
     def getRobotByID(self, ID: int) -> Robot:
         return self.robots[ID]
+
+    def getBall(self) -> Ball:
+        return self.ball
