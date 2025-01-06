@@ -34,7 +34,7 @@ class Robot:
         self.__updateRobotsData()
         return (self.robotsData[self.robot_ID].x, self.robotsData[self.robot_ID].y)
 
-    def __getOrintation(self) -> float:
+    def getOrintation(self) -> float:
         self.__updateRobotsData()
         return self.robotsData[self.robot_ID].orientation
 
@@ -72,7 +72,7 @@ class Robot:
         points = [(self.robotsData[i].x, self.robotsData[i].y) for i in range(num_of_robot) if i != self.robot_ID]
         return self.__raycast(points,self.__myRobotPosition(),self.__myRobotOrintation(),300)
 
-    def __sendCommand(self, x: float, y: float, z: float, kickPower: bool):
+    def sendCommand(self, x: float, y: float, z: float, kickPower: bool):
 
         self.ssl_msg.cmd_vel.angular.z = z
         self.ssl_msg.cmd_vel.linear.x = x
@@ -81,7 +81,7 @@ class Robot:
         self.pub.publish(self.ssl_msg)
 
     def goToPoint(self, point : tuple) -> None:
-        headingAngToBall = self.__angToPoint(point) - self.robot.orientation
+        headingAngToBall = self.__angToPoint(point) - self.getOrintation()
 
         if headingAngToBall > math.pi:
             headingAngToBall -= 2 * math.pi
@@ -90,11 +90,11 @@ class Robot:
             headingAngToBall += 2 * math.pi
 
         if self.__distanceToPoint(point) < 20:
-            self.__sendCommand(0,0,0,False)
+            self.sendCommand(0,0,0,False)
         elif abs(headingAngToBall) < 0.1:
-            self.__sendCommand(min(0.25*self.__distanceToPoint(point)+0.25,20),0,0,False)
+            self.sendCommand(min(0.25*self.__distanceToPoint(point)+0.25,20),0,0,False)
         elif abs(headingAngToBall) >= 0.1:
-            self.__sendCommand(0,0,3*headingAngToBall,False)
+            self.sendCommand(0,0,3*headingAngToBall,False)
 
     def nearPoint(self, point : tuple) -> bool:
         if self.__distanceToPoint(point) < 130:
@@ -102,7 +102,7 @@ class Robot:
         return False
 
     def faceToPoint(self, point : tuple) -> None:
-        headingAngToBall = self.__angToPoint(point) - self.robot.orientation
+        headingAngToBall = self.__angToPoint(point) - self.getOrintation()
 
         if headingAngToBall > math.pi:
             headingAngToBall -= 2 * math.pi
@@ -111,7 +111,7 @@ class Robot:
             headingAngToBall += 2 * math.pi
 
         if abs(headingAngToBall) >= 0.1:
-            self.__sendCommand(0,0,3*headingAngToBall,False)
+            self.sendCommand(0,0,3*headingAngToBall,False)
 
     def goToBall(self) -> None:
         self.goToPoint(self.ball.getPosition())

@@ -10,7 +10,7 @@ class Ball:
         def __updateBallData(data):
             self.ball = data.balls
 
-        self.sub: Subscriber = rospy.Subscriber("/vision", SSL_DetectionFrame, __updateBallData )
+        self.sub = rospy.Subscriber("/vision", SSL_DetectionFrame, __updateBallData )
         self.ball: Pose = Pose()
         self.position: tuple[int, int] = (0, 0)
 
