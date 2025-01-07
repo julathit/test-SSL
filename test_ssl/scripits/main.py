@@ -10,8 +10,24 @@ from component.Ball import Ball
 from component.RobotManager import RobotManager
 
 
-from action import MoveToBallAction, MoveToRandomPointAction, MoveToPointAction
+from action import MoveToBallAction, MoveToRandomPointAction, MoveToPointAction,Dribbler
 from typing import List
+
+def crateTree(robotManager: RobotManager):
+    root : Sequence = Sequence(name = "goToPoint" , memory=True)
+
+    goTB : MoveToBallAction = MoveToBallAction(robotManager,1)
+    drib: Dribbler = Dribbler(robotManager,1)
+    gotP: MoveToPointAction = MoveToPointAction(robotManager,1,(0,0))
+    gotP1: MoveToBallAction = MoveToPointAction(robotManager,1,(-1000,0))
+
+    root.add_child(drib)
+    root.add_child(gotP)
+    root.add_child(goTB)
+    root.add_child(gotP1)
+
+
+    return root
 
 if __name__ == "__main__":
 
@@ -21,11 +37,11 @@ if __name__ == "__main__":
 
     py_trees.logging.level = py_trees.logging.Level.DEBUG
 
-    gotoPoint: Behaviour = MoveToPointAction(robotManager, 1, (0,0))
-    action: Behaviour = MoveToBallAction(robotManager, 1)
+    root = crateTree(robotManager)
+    tree = py_trees.trees.BehaviourTree(root)
 
-    while not rospy.is_shutdown() and action.status not in [Status.SUCCESS,Status.FAILURE]:
+    while not rospy.is_shutdown() and tree.root.status not in [Status.SUCCESS,Status.FAILURE]:
         
-        action.tick_once()
+        tree.tick()
     else:
         print("Success.")

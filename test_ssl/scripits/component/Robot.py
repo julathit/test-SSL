@@ -52,108 +52,6 @@ class Robot:
 
         rospy.init_node("detect", anonymous=False)
 
-    def __updateRobotsData(self):
-        self.robotsData = self.updateRobotsData()
-        self.robot = self.robotsData[self.robot_ID]
-        self.ball.getPosition()
-
-    def getPosition(self) -> tuple:
-        self.__updateRobotsData()
-        return (self.robotsData[self.robot_ID].x, self.robotsData[self.robot_ID].y)
-
-    def getOrintation(self) -> float:
-        self.__updateRobotsData()
-        return self.robotsData[self.robot_ID].orientation
-
-    def __distanceToPoint(self, point: tuple) -> float:
-        self.__updateRobotsData()
-        return math.sqrt((point[1] - self.robotsData[self.robot_ID].y)**2 + (point[0] - self.robotsData[self.robot_ID].x)**2)
-
-    def __angToPoint(self, point: tuple) -> float:
-        self.__updateRobotsData()
-        return math.atan2(point[1] - self.robotsData[self.robot_ID].y,point[0] - self.robotsData[self.robot_ID].x)
-
-    def __distance(self, origins : tuple , points : list) -> list:
-        x, y = origins
-        return [np.sqrt((x - points[i][0])**2 + (y - points[i][1])**2) for i in range(len(points))]
-
-    def __raycast(self, points: list, origin: tuple, angle: float, dt: int, number_of_step=2) -> bool:
-        x = origin[0] + dt * np.cos(angle)
-        y = origin[1] + dt * np.sin(angle)
-        for _ in range(number_of_step):
-            distances = self.__distance((x,y), points)
-            print(distances)
-            for dis in distances:
-                if dis < dt/2:
-                    return True
-
-            x += dt * np.cos(angle)
-            y += dt * np.sin(angle)
-
-        return False
-
-
-    def rayHit(self) -> bool:
-        self.__updateRobotsData()
-        num_of_robot = self.num_of_robot
-        points = [(self.robotsData[i].x, self.robotsData[i].y) for i in range(num_of_robot) if i != self.robot_ID]
-        return self.__raycast(points, self.__myRobotPosition(), self.__myRobotOrintation(), 300)
-
-    def sendCommand(self, x: float, y: float, z: float, kickPower = False, dribbler = False):
-
-        self.ssl_msg.cmd_vel.angular.z = z
-        self.ssl_msg.cmd_vel.linear.x = x
-        self.ssl_msg.cmd_vel.linear.y = y
-        self.ssl_msg.kicker = kickPower
-        self.ssl_msg.dribbler = dribbler
-        self.pub.publish(self.ssl_msg)
-
-    def goToPoint(self, point : tuple,speed = 1.0) -> None:
-        maxSpeed = 2
-        headingAngToBall = self.__angToPoint(point) - self.getOrintation()
-
-        if headingAngToBall > math.pi:
-            headingAngToBall -= 2 * math.pi
-
-        elif headingAngToBall < -math.pi:
-            headingAngToBall += 2 * math.pi
-
-        if self.__distanceToPoint(point) < 20:
-            self.sendCommand(0,0,0,False)
-        elif abs(headingAngToBall) < 0.1:
-            self.sendCommand(min(0.25*self.__distanceToPoint(point)+0.25,maxSpeed)*speed,0,0,False)
-        elif abs(headingAngToBall) >= 0.1:
-            self.sendCommand(0,0,3*headingAngToBall,False)
-
-    def nearPoint(self, point : tuple, threshold: int = 40) -> bool:
-        if self.__distanceToPoint(point) < threshold:
-            return True
-        return False
-
-    def faceToPoint(self, point : tuple) -> None:
-        headingAngToBall = self.__angToPoint(point) - self.getOrintation()
-
-        if headingAngToBall > math.pi:
-            headingAngToBall -= 2 * math.pi
-
-        elif headingAngToBall < -math.pi:
-            headingAngToBall += 2 * math.pi
-
-        if abs(headingAngToBall) >= 0.1:
-            self.sendCommand(0,0,3*headingAngToBall,False)
-
-    def goToBall(self) -> None:
-        self.__updateRobotsData()
-        self.goToPoint(self.ball.getPosition())
-
-    def faceToBall(self) -> None:
-        self.faceToPoint(self.ball.getPosition())
-
-    def nearBall(self)-> bool:
-        return self.nearPoint(self.ball.getPosition(), 121)
-
-    #testing Method dwa
-
     # Define the motion model
     def motion(self,state: np.array, control_input: list, dt: float) -> np.array:
         x, y, yaw, v, omega = state
@@ -216,6 +114,120 @@ class Robot:
                     best_trajectory = trajectory
 
         return best_u, best_trajectory
+
+    def __updateRobotsData(self):
+        self.robotsData = self.updateRobotsData()
+        self.robot = self.robotsData[self.robot_ID]
+        self.ball.getPosition()
+
+    def getPosition(self) -> tuple:
+        self.__updateRobotsData()
+        return (self.robotsData[self.robot_ID].x, self.robotsData[self.robot_ID].y)
+
+    def getOrintation(self) -> float:
+        self.__updateRobotsData()
+        return self.robotsData[self.robot_ID].orientation
+
+    def __distanceToPoint(self, point: tuple) -> float:
+        self.__updateRobotsData()
+        return math.sqrt((point[1] - self.robotsData[self.robot_ID].y)**2 + (point[0] - self.robotsData[self.robot_ID].x)**2)
+
+    def __angToPoint(self, point: tuple) -> float:
+        self.__updateRobotsData()
+        return math.atan2(point[1] - self.robotsData[self.robot_ID].y,point[0] - self.robotsData[self.robot_ID].x)
+
+    def __distance(self, origins : tuple , points : list) -> list:
+        x, y = origins
+        return [np.sqrt((x - points[i][0])**2 + (y - points[i][1])**2) for i in range(len(points))]
+
+    def __raycast(self, points: list, origin: tuple, angle: float, dt: int, number_of_step=2) -> bool:
+        x = origin[0] + dt * np.cos(angle)
+        y = origin[1] + dt * np.sin(angle)
+        for _ in range(number_of_step):
+            distances = self.__distance((x,y), points)
+            print(distances)
+            for dis in distances:
+                if dis < dt/2:
+                    return True
+
+            x += dt * np.cos(angle)
+            y += dt * np.sin(angle)
+
+        return False
+
+    #robot command
+    def rayHit(self) -> bool:
+        self.__updateRobotsData()
+        num_of_robot = self.num_of_robot
+        points = [(self.robotsData[i].x, self.robotsData[i].y) for i in range(num_of_robot) if i != self.robot_ID]
+        return self.__raycast(points, self.__myRobotPosition(), self.__myRobotOrintation(), 300)
+
+    def sendCommand(self, x: float, y: float, z: float, kickPower = False, dribbler = False):
+
+        self.ssl_msg.cmd_vel.angular.z = z
+        self.ssl_msg.cmd_vel.linear.x = x
+        self.ssl_msg.cmd_vel.linear.y = y
+        self.ssl_msg.kicker = kickPower
+        self.ssl_msg.dribbler = dribbler
+        self.pub.publish(self.ssl_msg)
+
+    def goToPoint(self, point : tuple,speed = 1.0) -> None:
+        maxSpeed = 2
+        headingAngToBall = self.__angToPoint(point) - self.getOrintation()
+
+        if headingAngToBall > math.pi:
+            headingAngToBall -= 2 * math.pi
+
+        elif headingAngToBall < -math.pi:
+            headingAngToBall += 2 * math.pi
+
+        if self.__distanceToPoint(point) < 20:
+            self.sendCommand(0,0,0,False)
+        elif abs(headingAngToBall) < 0.1:
+            self.sendCommand(min(0.25*self.__distanceToPoint(point)+0.25,maxSpeed)*speed,0,0,False)
+        elif abs(headingAngToBall) >= 0.1:
+            self.sendCommand(0,0,3*headingAngToBall,False)
+
+    def nearPoint(self, point : tuple, threshold: int = 40) -> bool:
+        if self.__distanceToPoint(point) < threshold:
+            return True
+        return False
+
+    def faceToPoint(self, point : tuple) -> None:
+        headingAngToBall = self.__angToPoint(point) - self.getOrintation()
+
+        if headingAngToBall > math.pi:
+            headingAngToBall -= 2 * math.pi
+
+        elif headingAngToBall < -math.pi:
+            headingAngToBall += 2 * math.pi
+
+        if abs(headingAngToBall) >= 0.1:
+            self.sendCommand(0,0,3*headingAngToBall,False)
+    
+    def kick(self):
+        self.__updateRobotsData()
+        self.sendCommand(0,0,0,True,0)
+
+    def dribbler(self):
+        self.__updateRobotsData()
+        self.sendCommand(0,0,0,0, True)
+    
+    def stop(self):
+        self.__updateRobotsData()
+        self.sendCommand(0,0,0,False,False)
+
+    def goToBall(self,speed = 1.0) -> None:
+        self.__updateRobotsData()
+        self.goToPoint(self.ball.getPosition(),speed)
+
+    def faceToBall(self) -> None:
+        self.faceToPoint(self.ball.getPosition())
+
+    def nearBall(self)-> bool:
+        return self.nearPoint(self.ball.getPosition(), 145)
+
+    #testing Method dwa
     
     def getV(self):
         x,y = self.getPosition()
@@ -248,9 +260,9 @@ class Robot:
 
         if self.__distanceToPoint(point) < 300:
             self.goToPoint(point)
-        elif abs(headingAngToBall) < np.pi/2:
+        elif abs(headingAngToBall) < np.pi/4:
             self.bestMove(point)
-        elif abs(headingAngToBall) >= np.pi/2:
+        elif abs(headingAngToBall) >= np.pi/4:
             self.sendCommand(0,0,3*headingAngToBall,False)
 
     def MoveToBallModify(self):
@@ -264,8 +276,8 @@ class Robot:
         elif headingAngToBall < -math.pi:
             headingAngToBall += 2 * math.pi
 
-        if self.__distanceToPoint(point) < 500:
-            self.goToBall()
+        if self.__distanceToPoint(point) < 550:
+            self.goToBall(0.25)
         elif abs(headingAngToBall) < np.pi/4:
             self.bestMove(point)
         elif abs(headingAngToBall) >= np.pi/4:
