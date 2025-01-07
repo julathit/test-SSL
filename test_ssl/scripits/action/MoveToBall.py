@@ -11,7 +11,7 @@ class MoveToBall(Behaviour):
 
     def update(self):
         if self.robot.nearBall() != True:
-            self.robot.goToBall()
+            self.robot.MoveToBallModify()
             return Status.RUNNING
         else:
             self.feedback_message = ("I'm at the ball now!")

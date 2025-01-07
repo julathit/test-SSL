@@ -12,10 +12,9 @@ class MoveToPoint(Behaviour):
 
     def update(self):
         if not self.robot.nearPoint(self.point) :
-            self.robot.goToPoint(self.point)
+            self.robot.bestMoveModify(self.point)
             return Status.RUNNING
         else:
             print("suc")
             self.feedback_message = ("I'm at the point now!")
-            self.logger.debug("\n%s.update()[%s -> %s][%s]" % (self.__class__.__name__, self.status, Status.SUCCESS, self.feedback_message))
             return Status.SUCCESS
