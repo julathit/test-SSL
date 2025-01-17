@@ -1,0 +1,6 @@
+# match configuration
+[match]
+# all teams color
+teams = ["blue", "yellow"]
+# number of robots
+nor = 6

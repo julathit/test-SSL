@@ -26,8 +26,8 @@ class Robot:
 
         self.num_of_robot = 6
 
-        #this for dwa 
-        
+        #this for dwa
+
         # Robot specifications
         self.robot_radius = 200
         self.max_speed = 1000
@@ -62,7 +62,7 @@ class Robot:
         v = v_new
         omega = omega_new
         return np.array([x, y, yaw, v, omega])
-    
+
     def calculate_dynamic_window(self,state: np.array) -> tuple:
         v, omega = state[3], state[4]
         vs = [max(self.min_speed, v - self.max_accel * self.dt),
@@ -70,7 +70,7 @@ class Robot:
         ws = [max(-self.max_yaw_rate, omega - self.max_delta_yaw_rate * self.dt),
             min(self.max_yaw_rate, omega + self.max_delta_yaw_rate * self.dt)]
         return vs, ws
-    
+
     def predict_trajectory(self,state: np.array, v: float, omega: float) -> np.array:
         trajectory = [state]
         time = 0
@@ -79,12 +79,12 @@ class Robot:
             trajectory.append(state)
             time += self.dt
         return np.array(trajectory)
-    
+
     def calc_to_goal_cost(self,trajectory: list, goal: list) -> float:
         dx = goal[0] - trajectory[-1, 0]
         dy = goal[1] - trajectory[-1, 1]
         return np.hypot(dx, dy)
-    
+
     def calc_obstacle_cost(self,trajectory, obstacles):
         min_distance = float('inf')
         for ob in obstacles:
@@ -93,7 +93,7 @@ class Robot:
         if min_distance < self.robot_radius:
             return float('inf')  # Collision
         return 1.0 / min_distance
-    
+
     def dwa(self,state, goal, obstacles):
         dynamic_window = self.calculate_dynamic_window(state)
         best_u = [0.0, 0.0]
@@ -204,7 +204,7 @@ class Robot:
 
         if abs(headingAngToBall) >= 0.1:
             self.sendCommand(0,0,3*headingAngToBall,False)
-    
+
     def kick(self):
         self.__updateRobotsData()
         self.sendCommand(0,0,0,True,0)
@@ -212,7 +212,7 @@ class Robot:
     def dribbler(self):
         self.__updateRobotsData()
         self.sendCommand(0,0,0,0, True)
-    
+
     def stop(self):
         self.__updateRobotsData()
         self.sendCommand(0,0,0,False,False)
@@ -228,7 +228,7 @@ class Robot:
         return self.nearPoint(self.ball.getPosition(), 145)
 
     #testing Method dwa
-    
+
     def getV(self):
         x,y = self.getPosition()
         vx = x - self.oldx
@@ -236,7 +236,7 @@ class Robot:
         v = np.sqrt(vx**2+vy**2)
         self.oldx, self.oldy = x, y
         return v
-    
+
     def bestMove(self,point: tuple) -> list:
         self.__updateRobotsData()
         goal = np.array(point)
@@ -244,7 +244,7 @@ class Robot:
         obstacles = [(self.robotsData[i].x, self.robotsData[i].y) for i in range(self.num_of_robot) if i != self.robot_ID]
         x,y = self.getPosition()
         z = self.getOrintation()
-        state = np.array([x, y, z, self.getV(), 0.0]) 
+        state = np.array([x, y, z, self.getV(), 0.0])
         u,_ = self.dwa(state,goal,obstacles)
         vx, ome = u
         self.sendCommand(vx/90 + 1,0,ome*10,False)
@@ -282,4 +282,3 @@ class Robot:
             self.bestMove(point)
         elif abs(headingAngToBall) >= np.pi/4:
             self.sendCommand(0,0,3*headingAngToBall,False)
-        

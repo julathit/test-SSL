@@ -1,5 +1,33 @@
 from py_trees.behaviour import Behaviour
+from py_trees.common import Status
+from py_trees.composites import Selector, Sequence
 import py_trees
+
+from utils.blackboard import RobotBlackBoard
+from interface.robot import Robot, Role
+
+# 1
+class FielderAttackerBT(Sequence):
+    def __init__(self, robot: Robot):
+        super(FielderAttackerBT, self).__init__("Fielder Attacker BT")
+        self.add_children([checkIfAttackerRole(robot)])
+
+# 1.1
+class checkIfAttackerRole(Behaviour):
+    def __init__(self, robot: Robot):
+        super(checkIfAttackerRole, self).__init__("check If Attacker Role")
+        self.robot: Robot = robot
+
+    def setup(self):
+        if RobotBlackBoard.getRole(self.robot) == Role.ATTACKER:
+            return Status.SUCCESS
+        else: return Status.FAILURE
+
+# 1.2
+class RobotHasPossesionBT(Sequence):
+    def __init__(self, robot: Robot):
+        super(FielderAttackerBT, self).__init__("Robot has possesion BT")
+        self.add_children([]) # import Action
 
 robot_has_possesion = py_trees.composites.Selector("Robot has possesion?")
 
@@ -9,6 +37,7 @@ determine_location_to_position = Behaviour("Determine location to position")
 move_to_position = Behaviour("Move to position")
 
 position_self.add_children([determine_location_to_position, move_to_position])
+py_trees.composites.Selector().add_child()
 
 has_open_shoot = py_trees.composites.Selector("Has Open Shot?")
 
