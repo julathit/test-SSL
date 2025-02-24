@@ -6,6 +6,8 @@ from krssg_ssl_msgs.msg import *
 import rospy
 import time
 import tomli
+import signal
+import sys
 
 from utils.blackboard import RobotBlackBoard
 
@@ -69,9 +71,16 @@ class Initializer():
 
     @staticmethod
     def init_all() -> bool:
+
+        def handler(signum, frame):
+            print("\n[!] Interrupt received, stopping...")
+            sys.exit(0)
+
+        signal.signal(signal.SIGINT, handler)
+
         if not Initializer.initConfig():
             return False
-        if not Initializer.initSubscriber():
-            return False
+        # if not Initializer.initSubscriber():
+        #     return False
 
         return True

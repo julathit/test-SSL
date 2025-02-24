@@ -4,3 +4,7 @@
 teams = ["blue", "yellow"]
 # number of robots
 nor = 6
+
+# need to implement
+goallee_id = 0
+fielder_id = [1, 2, 3, 4, 5]

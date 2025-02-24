@@ -1,4 +1,6 @@
-from py_trees.behaviour import Behaviour
+# from py_trees.behaviour import Behaviour
+from utils.mockBehaviour import Behaviour
+
 from py_trees.common import Status
 from py_trees.composites import Selector, Sequence
 import py_trees
@@ -9,8 +11,8 @@ from interface.robot import Robot, Role
 # 1
 class FielderAttackerBT(Sequence):
     def __init__(self, robot: Robot):
-        super(FielderAttackerBT, self).__init__("Fielder Attacker BT")
-        self.add_children([checkIfAttackerRole(robot)])
+        super(FielderAttackerBT, self).__init__("Fielder Attacker BT", True)
+        self.add_children([checkIfAttackerRole(robot), FielderAttackerHasPossessionSelector(robot)])
 
 # 1.1
 class checkIfAttackerRole(Behaviour):
@@ -18,48 +20,99 @@ class checkIfAttackerRole(Behaviour):
         super(checkIfAttackerRole, self).__init__("check If Attacker Role")
         self.robot: Robot = robot
 
-    def setup(self):
+    def update(self):
         if RobotBlackBoard.getRole(self.robot) == Role.ATTACKER:
             return Status.SUCCESS
         else: return Status.FAILURE
 
-# 1.2
+class FielderAttackerHasPossessionSelector(Selector):
+    def __init__(self, robot: Robot):
+        super(FielderAttackerHasPossessionSelector, self).__init__("FielderAction HasPossession Condition Selector", True)
+        self.add_children([RobotHasPossesionBT(robot), FielderAttackerHasOpenShotSelector(robot)])
+
 class RobotHasPossesionBT(Sequence):
     def __init__(self, robot: Robot):
-        super(FielderAttackerBT, self).__init__("Robot has possesion BT")
-        self.add_children([]) # import Action
+        super(RobotHasPossesionBT, self).__init__("Robot has possesion BT", True)
 
-robot_has_possesion = py_trees.composites.Selector("Robot has possesion?")
+        # simulate behavior / implement out of this scope
+        position_self = py_trees.composites.Sequence("Position self", True)
 
-position_self = py_trees.composites.Sequence("Position self")
+        determine_location_to_position = Behaviour("Determine location to position")
+        move_to_position = Behaviour("Move to position")
 
-determine_location_to_position = Behaviour("Determine location to position")
-move_to_position = Behaviour("Move to position")
+        position_self.add_children([determine_location_to_position, move_to_position])
 
-position_self.add_children([determine_location_to_position, move_to_position])
-py_trees.composites.Selector().add_child()
+        self.add_children([RobotHasPossesion(robot), position_self])
 
-has_open_shoot = py_trees.composites.Selector("Has Open Shot?")
+class RobotHasPossesion(Behaviour):
+    def __init__(self, robot: Robot):
+        super(RobotHasPossesion, self).__init__("Robot has possesion?")
 
-shoot = py_trees.composites.Sequence("Shoot")
+    def update(self):
+        # need to implement
+        if RobotBlackBoard.getRole(self.robot) == Role.ATTACKER:
+            return Status.SUCCESS
+        else: return Status.FAILURE
 
-determine_optimal_shot = Behaviour("Determine optimal shot")
-kick_ball_quickly_at_target = Behaviour("Kick ball quickly at target")
+class FielderAttackerHasOpenShotSelector(Selector):
+    def __init__(self, robot: Robot):
+        super(FielderAttackerHasOpenShotSelector, self).__init__("FielderAction HasOpenShot Condition Selector", True)
+        self.add_children([RobotHasOpenShotBT(robot), FielderAttackerSpaceInFrontSelector(robot)])
 
-shoot.add_children([determine_optimal_shot, kick_ball_quickly_at_target])
+class RobotHasOpenShotBT(Sequence):
+    def __init__(self, robot: Robot):
+        super(RobotHasOpenShotBT, self).__init__("Robot has possesion BT", True)
 
-space_in_front_of_ballholder = py_trees.composites.Selector("Space in front of ballholder?")
+        # simulate behavior / implement out of this scope
+        shoot = py_trees.composites.Sequence("Shoot", True)
 
-dribble = Behaviour("Dribble")
+        determine_optimal_shot = Behaviour("Determine optimal shot")
+        kick_ball_quickly_at_target = Behaviour("Kick ball quickly at target")
 
-coordinated_pass = py_trees.composites.Sequence("Coordinated Pass")
+        shoot.add_children([determine_optimal_shot, kick_ball_quickly_at_target])
 
-choose_ally = Behaviour("Choose Ally")
-determine_if_chip_needed = Behaviour("Determine if chip needed")
-execute_pass = Behaviour("Execute pass")
+        self.add_children([RobotHasOpenShot(robot), shoot])
 
-coordinated_pass.add_children([choose_ally, determine_if_chip_needed, execute_pass])
+class RobotHasOpenShot(Behaviour):
+    def __init__(self, robot: Robot):
+        super(RobotHasOpenShot, self).__init__("Robot has open shot?")
 
-space_in_front_of_ballholder.add_children([shoot, space_in_front_of_ballholder])
+    def update(self):
+        # not implement yet
+        if True:
+            return Status.SUCCESS
+        else: return Status.FAILURE
 
-robot_has_possesion.add_children([position_self, has_open_shoot])
+class FielderAttackerSpaceInFrontSelector(Selector):
+    def __init__(self, robot: Robot):
+        super(FielderAttackerSpaceInFrontSelector, self).__init__("FielderAction Space in front of ballholder Condition Selector", True)
+
+        # simulate behavior / implement out of this scope
+        coordinated_pass = py_trees.composites.Sequence("Coordinated Pass", True)
+
+        choose_ally = Behaviour("Choose Ally")
+        determine_if_chip_needed = Behaviour("Determine if chip needed")
+        execute_pass = Behaviour("Execute pass")
+
+        coordinated_pass.add_children([choose_ally, determine_if_chip_needed, execute_pass])
+
+        self.add_children([RobotSpaceInFrontBT(robot), coordinated_pass])
+
+class RobotSpaceInFrontBT(Sequence):
+    def __init__(self, robot: Robot):
+        super(RobotSpaceInFrontBT, self).__init__("Robot has space in front of ballholder BT", True)
+
+        # simulate behavior / implement out of this scope
+        dribble = Behaviour("Dribble")
+
+        self.add_children([RobotSpaceInFront(robot), dribble])
+
+class RobotSpaceInFront(Behaviour):
+    def __init__(self, robot: Robot):
+        super(RobotSpaceInFront, self).__init__("Robot has space in front of ball holder?")
+
+    def update(self):
+        # not implement yet
+        if True:
+            return Status.SUCCESS
+        else: return Status.FAILURE
