@@ -6,7 +6,8 @@ from py_trees.composites import Selector, Sequence
 import py_trees
 
 from utils.blackboard import RobotBlackBoard
-from interface.robot import Robot, Role
+from component.robot import Robot
+from component.misc import Role
 
 # 1
 class FielderAttackerBT(Sequence):

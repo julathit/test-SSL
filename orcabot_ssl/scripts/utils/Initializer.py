@@ -22,7 +22,7 @@ class Initializer():
                 print("[initConfig] Success!")
                 return True
         except FileNotFoundError:
-            print("config file not found? template file creation will be implemented soon")
+            print("[initConfig] config file not found? template file creation will be implemented soon")
 
     @staticmethod
     def initSubscriber() -> bool:
@@ -70,6 +70,17 @@ class Initializer():
         return False
 
     @staticmethod
+    def initZoneManager() -> bool:
+        print("[initZoneManager] initializing zone manager")
+        try:
+            from component.area import ZoneManager
+            print("[initZoneManager] Success!")
+            return True
+        except Exception as e:
+            print(f"[initZoneManager] failed: {e}")
+            return False
+
+    @staticmethod
     def init_all() -> bool:
 
         def handler(signum, frame):
@@ -80,7 +91,7 @@ class Initializer():
 
         if not Initializer.initConfig():
             return False
-        # if not Initializer.initSubscriber():
-        #     return False
+        if not Initializer.initSubscriber():
+            return False
 
         return True

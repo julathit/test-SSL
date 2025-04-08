@@ -1,10 +1,28 @@
+# field configuration
+[field]
+
+# field size
+field_size = [9000, 6000]
+goal_size = [1000, 2000]
+
+field_dividing_factor = [1, 1, 1]
+
 # match configuration
 [match]
-# all teams color
+# all teams color arranged in the order of left to right
 teams = ["blue", "yellow"]
 # number of robots
 nor = 6
+# our team color
+our_team = "blue"
+# opponent_team = "yellow"
 
 # need to implement
-goallee_id = 0
-fielder_id = [1, 2, 3, 4, 5]
+[myteam]
+# fielder_id = [1, 2, 3, 4, 5]
+# assign role from left to right
+goallie_id = 5
+defender_id = [4, 2]
+center_id = [0, 1]
+attacker_id = 3
+

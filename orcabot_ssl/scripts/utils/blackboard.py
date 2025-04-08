@@ -1,7 +1,13 @@
 from py_trees.blackboard import Client
 from py_trees.common import Access
 
-from interface.robot import RobotList, RobotDict, Robot, Position, Role
+from component.robot import Robot
+from component.misc import Position, Role
+from component.robotEx import RobotDict, RobotList
+
+from utils.colors import Colors
+
+import traceback
 
 class RobotBlackBoard():
     _initialized = False
@@ -40,8 +46,27 @@ class RobotBlackBoard():
 
         return super().__new__(cls)
 
+    @staticmethod
     def setConfig(config):
         RobotBlackBoard._bb_param.parameters = config
+
+    @staticmethod
+    def getConfig(*keys):
+        config = RobotBlackBoard._bb_param.parameters
+        try:
+            for key in keys:
+                config = config[key]
+            return config
+        except KeyError as e:
+            print(f"{Colors.FAIL}[blackboard] -> Error: Missing key: {e} when involving getConfig for {keys}.\n[blackboard] -> The full traceback is shown below")
+            traceback.print_stack()
+            print(f"{Colors.FAIL}[blackboard] -> To prevent any further unexpected behavior, the program will be terminated")
+            exit(1)
+        except Exception as e:
+            print(f"{Colors.FAIL}[blackboard] -> Unexpected error: {e}.\n[blackboard] -> The full traceback is shown below")
+            traceback.print_stack()
+            print(f"{Colors.FAIL}[blackboard] -> To prevent any further unexpected behavior, the program will be terminated")
+            exit(1)
 
     @staticmethod
     def printAllInfo():
@@ -49,16 +74,24 @@ class RobotBlackBoard():
         print(RobotBlackBoard._bb_param)
 
     @staticmethod
-    def getRobots(team: str = "", id: int = -1): # may return RobotDict, RobotList, Robot
-        if team in RobotBlackBoard._bb_param.parameters["match"]["teams"]:
-            if id in range(RobotBlackBoard._bb_param.parameters["match"]["nor"]):
-                return RobotBlackBoard._bb_manager.robots[team][id]
-            return RobotBlackBoard._bb_manager.robots[team]
+    def getRobot(team: str = "", id: int = -1) -> Robot:
+        return RobotBlackBoard._bb_manager.robots[team][id]
+
+    @staticmethod
+    def getRobotList(team: str = "") -> RobotList:
+        return RobotBlackBoard._bb_manager.robots[team]
+
+    @staticmethod
+    def getRobotDict() -> RobotDict:
         return RobotBlackBoard._bb_manager.robots
 
     # @staticmethod
     # def getRobotRole(id: int) -> Role:
     #     return RobotBlackBoard._bb_manager.robo
+
+    @staticmethod
+    def getBallPosition() -> Position:
+        return RobotBlackBoard._bb_manager.ball
 
     @staticmethod
     def patchRobotData(team: str, newdatalist):
