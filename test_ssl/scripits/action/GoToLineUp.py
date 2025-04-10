@@ -6,9 +6,11 @@ from component.RobotManager import RobotManager
 
 from numpy import sqrt
 
+#need fix
+
 class GoToLineUp(Behaviour):
 
-    def __init__(self, robotManager: RobotManager, robot_ID: int, robot_target_ID: int, distance: int = 200):
+    def __init__(self, robotManager: RobotManager, robot_ID: int, robot_target_ID: int,avoidBall = False, distance: int = 300):
         super(GoToLineUp, self).__init__(f"make line Up robot_ID {robot_ID}")
         self.robot_ID: int = robot_ID
         self.robot: Robot = robotManager.getRobotByID(self.robot_ID)
@@ -40,5 +42,5 @@ class GoToLineUp(Behaviour):
         if self.robot.nearPoint(line_up_p):
             return Status.SUCCESS
         else:
-            self.robot.goToPoint(line_up_p)
+            self.robot.bestMoveModify(line_up_p)
             return Status.RUNNING

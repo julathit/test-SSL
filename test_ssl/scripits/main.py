@@ -10,24 +10,21 @@ from component.Ball import Ball
 from component.RobotManager import RobotManager
 
 
-from action import MoveToBallAction, MoveToRandomPointAction, MoveToPointAction,Dribbler
+from action import MoveToBallAction, KickAction, passBallAction
 from typing import List
 
-def crateTree(robotManager: RobotManager):
-    root : Sequence = Sequence(name = "goToPoint" , memory=True)
+# def crateTree(robotManager: RobotManager):
+#     root : Sequence = Sequence(name = "goToPoint" , memory=True)
 
-    goTB : MoveToBallAction = MoveToBallAction(robotManager,1)
-    drib: Dribbler = Dribbler(robotManager,1)
-    gotP: MoveToPointAction = MoveToPointAction(robotManager,1,(0,0))
-    gotP1: MoveToBallAction = MoveToPointAction(robotManager,1,(-1000,0))
+#     goTB : MoveToBallAction = MoveToBallAction(robotManager,1)
+#     kcikBall: KickAction = KickAction(robotManager,1)
 
-    root.add_child(drib)
-    root.add_child(gotP)
-    root.add_child(goTB)
-    root.add_child(gotP1)
+#     root.add_child(goTB)
+#     root.add_child(kcikBall)
 
 
-    return root
+
+#     return root
 
 if __name__ == "__main__":
 
@@ -37,7 +34,14 @@ if __name__ == "__main__":
 
     py_trees.logging.level = py_trees.logging.Level.DEBUG
 
-    root = crateTree(robotManager)
+    root : Sequence = Sequence(name = "goToPoint" , memory=True)
+
+    pass1to2 = passBallAction(robotManager,1,2)
+    pass2to3 = passBallAction(robotManager,2,3)
+    pass3to1 = passBallAction(robotManager,3,1)
+    root.add_child(pass1to2)
+    root.add_child(pass2to3)
+    root.add_child(pass3to1)
     tree = py_trees.trees.BehaviourTree(root)
 
     while not rospy.is_shutdown() and tree.root.status not in [Status.SUCCESS,Status.FAILURE]:

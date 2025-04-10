@@ -188,12 +188,12 @@ class Robot:
         elif abs(headingAngToBall) >= 0.1:
             self.sendCommand(0,0,3*headingAngToBall,False)
 
-    def nearPoint(self, point : tuple, threshold: int = 40) -> bool:
+    def nearPoint(self, point : tuple, threshold: int = 20) -> bool:
         if self.__distanceToPoint(point) < threshold:
             return True
         return False
 
-    def faceToPoint(self, point : tuple) -> None:
+    def faceToPoint(self, point : tuple) -> bool:
         headingAngToBall = self.__angToPoint(point) - self.getOrintation()
 
         if headingAngToBall > math.pi:
@@ -204,6 +204,9 @@ class Robot:
 
         if abs(headingAngToBall) >= 0.1:
             self.sendCommand(0,0,3*headingAngToBall,False)
+            return False
+        else:
+            return True
     
     def kick(self):
         self.__updateRobotsData()
@@ -222,10 +225,10 @@ class Robot:
         self.goToPoint(self.ball.getPosition(),speed)
 
     def faceToBall(self) -> None:
-        self.faceToPoint(self.ball.getPosition())
+        return self.faceToPoint(self.ball.getPosition())
 
     def nearBall(self)-> bool:
-        return self.nearPoint(self.ball.getPosition(), 145)
+        return self.nearPoint(self.ball.getPosition(), 115)
 
     #testing Method dwa
     
@@ -237,19 +240,21 @@ class Robot:
         self.oldx, self.oldy = x, y
         return v
     
-    def bestMove(self,point: tuple) -> list:
+    def bestMove(self,point: tuple,speed = 1.0,avoidBall = False) -> list:
         self.__updateRobotsData()
         goal = np.array(point)
 
         obstacles = [(self.robotsData[i].x, self.robotsData[i].y) for i in range(self.num_of_robot) if i != self.robot_ID]
+        if avoidBall:
+            obstacles.append(self.ball.getPosition())
         x,y = self.getPosition()
         z = self.getOrintation()
         state = np.array([x, y, z, self.getV(), 0.0]) 
         u,_ = self.dwa(state,goal,obstacles)
         vx, ome = u
-        self.sendCommand(vx/90 + 1,0,ome*10,False)
+        self.sendCommand((vx/90  + 1)*speed,0,ome*10,False)
 
-    def bestMoveModify(self, point: tuple):
+    def bestMoveModify(self, point: tuple,avoidBall = False):
         headingAngToBall = self.__angToPoint(point) - self.getOrintation()
 
         if headingAngToBall > math.pi:
@@ -258,10 +263,12 @@ class Robot:
         elif headingAngToBall < -math.pi:
             headingAngToBall += 2 * math.pi
 
-        if self.__distanceToPoint(point) < 300:
-            self.goToPoint(point)
+        if self.__distanceToPoint(point) < 250:
+            self.goToPoint(point,0.6)
+        elif self.__distanceToPoint(point) < 400:
+            self.goToPoint(point,0.4)
         elif abs(headingAngToBall) < np.pi/4:
-            self.bestMove(point)
+            self.bestMove(point,0.6,avoidBall)
         elif abs(headingAngToBall) >= np.pi/4:
             self.sendCommand(0,0,3*headingAngToBall,False)
 
@@ -276,10 +283,52 @@ class Robot:
         elif headingAngToBall < -math.pi:
             headingAngToBall += 2 * math.pi
 
-        if self.__distanceToPoint(point) < 550:
-            self.goToBall(0.25)
+        if self.__distanceToPoint(point) < 250:
+            self.goToBall(0.3)
+        elif self.__distanceToPoint(point) < 400:
+            self.goToBall(0.7)
         elif abs(headingAngToBall) < np.pi/4:
             self.bestMove(point)
-        elif abs(headingAngToBall) >= np.pi/4:
+        elif abs(headingAngToBall) >= 0.1:
             self.sendCommand(0,0,3*headingAngToBall,False)
+        
+
+    def aiming(self,point: tuple, target: tuple, r = 250, speed = 1.0):
+        headingAngToBall = self.__angToPoint(point) - self.getOrintation() 
+        distance = self.__distanceToPoint(point)
+        headingAngle_to_target = math.atan2( target[1] - point[1] ,target[0] - point[0] ) - self.__angToPoint(point)
+        maxSpeed = 0.5
+        err = 50
+
+        #compute for headingAngle
+        if headingAngToBall > math.pi:
+            headingAngToBall -= 2 * math.pi 
+        elif headingAngToBall < -math.pi:
+            headingAngToBall += 2 * math.pi 
+
+        #compute for robotAngle
+        if headingAngle_to_target > math.pi:
+            headingAngle_to_target -= 2 * math.pi 
+        elif headingAngle_to_target < -math.pi:
+            headingAngle_to_target += 2 * math.pi 
+
+        if abs(headingAngToBall) >= 0.2:
+            self.sendCommand(0,0,2*headingAngToBall,False)
+        elif abs(headingAngToBall) < 0.2:
+            xspeed = 0
+
+            if abs(distance) < r - err:
+                    xspeed = -min(0.25*self.__distanceToPoint(point)+0.25,maxSpeed)*speed
+            elif abs(distance) > r + err:
+                    xspeed = min(0.25*self.__distanceToPoint(point)+0.25,maxSpeed)*speed
+            
+
+            if abs(headingAngle_to_target) >= 0.01 or abs(headingAngToBall) >= 0.1:
+                self.sendCommand(xspeed,-headingAngle_to_target*0.5 ,(2*headingAngToBall+headingAngle_to_target),False)
+            else:
+                
+                self.sendCommand(0,0,0,False)
+                return True
+        return False
+    # def aimball(self,point: tuple,v: float,target: tuple, r = 250, speed = 1.0):
         

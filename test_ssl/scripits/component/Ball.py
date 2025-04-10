@@ -12,7 +12,15 @@ class Ball:
 
         self.sub = rospy.Subscriber("/vision", SSL_DetectionFrame, __updateBallData )
         self.ball = Pose()
-        self.position = (1000,0)
+        for _ in range(200):
+            try:
+                self.position = (self.ball[0].x, self.ball[0].y)
+            # print('return')
+            except:
+                # print('except')
+                pass
+        else:
+            self.position = (0, 0)
 
     def getPosition(self) -> tuple:
         try:
