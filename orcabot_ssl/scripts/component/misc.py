@@ -12,3 +12,9 @@ class Position(object):
 
     def __str__(self):
         return str("Position ({}, {})".format(self.x, self.y))
+
+    def to_list(self):
+        return [self.x, self.y]
+
+    def to_tuple(self):
+        return (self.x, self.y)

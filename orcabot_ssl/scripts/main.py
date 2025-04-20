@@ -1,32 +1,32 @@
 #! /usr/bin/env python3
+from utils.orcabot import *
 
-from utils.blackboard import RobotBlackBoard
-from utils.Initializer import Initializer
+enable_debug()
 
-#initialize
-if not Initializer.init_all():
-    exit()
+# RobotBlackBoard.printAllInfo()
 
-RobotBlackBoard.printAllInfo()
+def main():
+    root: Sequence = Sequence(name = "goToPoint", memory=True)
 
-# print(RobotBlackBoard.getRobots())
-# print(RobotBlackBoard.getRobots("blue"))
-# print(RobotBlackBoard.getRobots("blue", 2))
+    passBall1 = passBallBehavior(1, 2)
+    passBall2 = passBallBehavior(2, 3)
+    passBall3 = passBallBehavior(3, 1)
+    gotoball1 = MoveToBallAction(1)
+    catch = DribblerAction(1, 2)
 
-# print(RobotBlackBoard.getConfig("field", "field_size"))
+    root.add_children([
+        passBall1,
+        passBall2,
+        passBall3,
+        gotoball1,
+        catch
+    ])
 
-# print(RobotBlackBoard.getBallPosition())
+    tree = py_trees.trees.BehaviourTree(root)
 
-#test area
-from component.area import ZoneManager
+    while True:
+        tree.tick()
+    else:
+        print("Success.")
 
-# from utils.debugger.render_field_in_pygame import render
-# render(zone_manager.getAllZones())
-# render(zone_manager.getAllOpponentZones())
-
-for robot in RobotBlackBoard.getRobots("blue"):
-    print(robot.id, ZoneManager.getZoneFromPosition(robot.position))
-
-print("ball: ", ZoneManager.getZoneFromPosition(RobotBlackBoard.getBallPosition()))
-# from utils.debugger.render_field_in_pygame import render
-# render(ZoneManager.getAllZones())
+main()

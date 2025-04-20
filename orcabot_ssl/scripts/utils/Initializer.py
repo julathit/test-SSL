@@ -58,6 +58,7 @@ class Initializer():
 
         retry = True
         timeout = 3
+        time.sleep(0.1)
         while retry and timeout > 0:
             if Initializer.sub_data_received:
                 print("[initSubscriber] Success!")
@@ -82,6 +83,7 @@ class Initializer():
 
     @staticmethod
     def init_all() -> bool:
+        print("[Initializer] initializing all components")
 
         def handler(signum, frame):
             print("\n[!] Interrupt received, stopping...")
@@ -93,5 +95,8 @@ class Initializer():
             return False
         if not Initializer.initSubscriber():
             return False
+        if not Initializer.initZoneManager():
+            return False
+        print("[Initializer] All initializations completed successfully!")
 
         return True

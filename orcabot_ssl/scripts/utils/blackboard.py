@@ -16,14 +16,21 @@ class RobotBlackBoard():
     def __new__(cls, *args, **kwargs):
         if not cls._initialized:
             cls._initialized = True
+
+            cls._bb_param = Client(name = "Config Parameter blackboard")
+
+            cls._bb_param.register_key(key="parameters", access=Access.WRITE)
+            cls._bb_param.register_key(key="parameters", access=Access.READ)
+            cls._bb_param.parameters = dict()
+
             cls._bb_manager = Client(name = "Main Robot blackboard")
 
             # Robot
             cls._bb_manager.register_key(key="robots", access=Access.WRITE)
             cls._bb_manager.register_key(key="robots", access=Access.READ)
             cls._bb_manager.robots = RobotDict()
-            cls._bb_manager.robots["yellow"] = RobotList(6)
-            cls._bb_manager.robots["blue"] = RobotList(6)
+            cls._bb_manager.robots["yellow"] = RobotList("yellow", 6)
+            cls._bb_manager.robots["blue"] = RobotList("blue", 6)
 
             # Ball
             cls._bb_manager.register_key(key="ball", access=Access.WRITE)
@@ -38,17 +45,20 @@ class RobotBlackBoard():
             # cls._bb_manager.register_key(key="gamestate", access=Access.READ)
             # cls._bb_manager.gamestate = dict()
 
-            cls._bb_param = Client(name = "Config Parameter blackboard")
-
-            cls._bb_param.register_key(key="parameters", access=Access.WRITE)
-            cls._bb_param.register_key(key="parameters", access=Access.READ)
-            cls._bb_param.parameters = dict()
-
         return super().__new__(cls)
 
     @staticmethod
     def setConfig(config):
         RobotBlackBoard._bb_param.parameters = config
+        RobotBlackBoard.initConfig()
+
+    @staticmethod 
+    def initConfig():
+        for team in RobotBlackBoard.getRobotDict().keys():
+            for robot in RobotBlackBoard.getRobotList(team):
+                robot.nor = RobotBlackBoard.getConfig("match", "nor")
+                robot.team = RobotBlackBoard.getConfig("match", "our_team")
+                robot.updatePub()
 
     @staticmethod
     def getConfig(*keys):
@@ -69,7 +79,11 @@ class RobotBlackBoard():
             exit(1)
 
     @staticmethod
-    def printAllInfo():
+    def getMyTeam() -> str:
+        return RobotBlackBoard.getConfig("match", "our_team")
+
+    @staticmethod
+    def printAllInfo() -> None:
         print(RobotBlackBoard._bb_manager)
         print(RobotBlackBoard._bb_param)
 

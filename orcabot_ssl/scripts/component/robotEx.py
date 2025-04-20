@@ -3,11 +3,12 @@ from component.misc import Position
 from utils.colors import Colors
 
 class RobotList(list):
-    def __init__(self, size: int):
+    def __init__(self, team: str, size: int):
         super(RobotList, self).__init__()
         self.size = size
+        self.team = team
         for i in range(size):
-            self.append(Robot(i, Position(0, 0), 0))
+            self.append(Robot(team, i, Position(0, 0), 0))
 
     # for debugging
     def __str__(self):
