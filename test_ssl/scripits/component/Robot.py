@@ -2,7 +2,7 @@
 from geometry_msgs.msg import *
 from gazebo_msgs.msg import *
 from grsim_ros_bridge_msgs.msg import *
-from krssg_ssl_msgs.msg import *
+# from krssg_ssl_msgs.msg import *
 
 import numpy as np
 import rospy

@@ -12,9 +12,8 @@ if __name__=='__main__':
 
     robotManager: RobotManager = RobotManager(6, Ball())
 
-    key_control = ManualControl(robotManager, 1)
+    key_control = ManualControl(robotManager, 0)
     key_control.debug = False
-    robot: Robot = robotManager.getRobotByID(1)
 
     while True:
         key_control.update()
