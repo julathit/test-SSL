@@ -6,6 +6,8 @@ from krssg_ssl_msgs.msg import *
 import rospy
 import time
 import tomli
+import signal
+import sys
 
 from utils.blackboard import RobotBlackBoard
 
@@ -20,7 +22,7 @@ class Initializer():
                 print("[initConfig] Success!")
                 return True
         except FileNotFoundError:
-            print("config file not found? template file creation will be implemented soon")
+            print("[initConfig] config file not found? template file creation will be implemented soon")
 
     @staticmethod
     def initSubscriber() -> bool:
@@ -56,6 +58,7 @@ class Initializer():
 
         retry = True
         timeout = 3
+        time.sleep(0.1)
         while retry and timeout > 0:
             if Initializer.sub_data_received:
                 print("[initSubscriber] Success!")
@@ -68,10 +71,32 @@ class Initializer():
         return False
 
     @staticmethod
+    def initZoneManager() -> bool:
+        print("[initZoneManager] initializing zone manager")
+        try:
+            from component.area import ZoneManager
+            print("[initZoneManager] Success!")
+            return True
+        except Exception as e:
+            print(f"[initZoneManager] failed: {e}")
+            return False
+
+    @staticmethod
     def init_all() -> bool:
+        print("[Initializer] initializing all components")
+
+        def handler(signum, frame):
+            print("\n[!] Interrupt received, stopping...")
+            sys.exit(0)
+
+        signal.signal(signal.SIGINT, handler)
+
         if not Initializer.initConfig():
             return False
         if not Initializer.initSubscriber():
             return False
+        if not Initializer.initZoneManager():
+            return False
+        print("[Initializer] All initializations completed successfully!")
 
         return True
