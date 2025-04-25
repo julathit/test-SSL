@@ -1,17 +1,19 @@
-from enum import Enum
-from component.misc import Position
+from enum import Enum, auto
+from component.misc import Position, Role
 from utils.blackboard import RobotBlackBoard
 
 from copy import deepcopy
+import numpy as np
 
 #zone definition
 class Zone(Enum):
-    GOALKEEPER = 1
-    DEFENSIVE_LEFT = 2
-    DEFENSIVE_RIGHT = 3
-    CENTER_LEFT = 4
-    CENTER_RIGHT = 5
-    ATTACKING = 6
+    GOALKEEPER = auto()
+    DEFENSIVE_LEFT = auto()
+    DEFENSIVE_RIGHT = auto()
+    CENTER_LEFT = auto()
+    CENTER_RIGHT = auto()
+    ATTACKING = auto()
+    GOAL = auto()
 
 class ZoneManager():
     _initialized: bool = False
@@ -116,7 +118,7 @@ class ZoneManager():
         return ZoneManager.opponent_zone_position
 
     @staticmethod
-    def __getZoneBoundary(zone: Zone) -> dict:
+    def getZoneBoundary(zone: Zone) -> dict:
         if zone == Zone.GOALKEEPER:
             return ZoneManager.zone_position["goalkeeper"]
         elif zone == Zone.DEFENSIVE_LEFT:
@@ -129,12 +131,14 @@ class ZoneManager():
             return ZoneManager.zone_position["center_right"]
         elif zone == Zone.ATTACKING:
             return ZoneManager.zone_position["attacking"]
+        elif zone == Zone.GOAL:
+            return ZoneManager.zone_position["goal"]
         else:
-            raise ValueError("Invalid zone type")
+            raise ValueError("Invalid zone type. get ", zone)
 
     @staticmethod
     def isInZone(position: Position, zone: Zone) -> bool:
-        zone_def = ZoneManager.__getZoneBoundary(zone)
+        zone_def = ZoneManager.getZoneBoundary(zone)
         if position.x >= zone_def["x_min"] and position.x <= zone_def["x_max"] and position.y >= zone_def["y_min"] and position.y <= zone_def["y_max"]:
             return True
         return False
@@ -145,5 +149,53 @@ class ZoneManager():
             if ZoneManager.isInZone(position, zone):
                 return zone
         return None
+
+    @staticmethod
+    def getCenterOfZone(zone: Zone) -> Position:
+        zone_def = ZoneManager.getZoneBoundary(zone)
+        x = (zone_def["x_min"] + zone_def["x_max"]) / 2
+        y = (zone_def["y_min"] + zone_def["y_max"]) / 2
+        return Position(x, y)
+
+    # create a method to get the nearest point on the entrance of the opponent goal with offset so the ball can enter the goal
+    @staticmethod
+    def getNearestPointOnGoalEntrance(position: Position, offset: float) -> Position:
+        goal_boundary = ZoneManager.opponent_zone_position["goal"]
+
+        a = np.array([goal_boundary["x_min"], goal_boundary["y_min"] + offset])
+        b = np.array([goal_boundary["x_min"], goal_boundary["y_max"] - offset])
+
+        given_point = np.array(position.to_list())
+
+        d_ab = b - a
+        d_ap = given_point - a
+        sqr_length = np.dot(d_ab, d_ab)
+        vec_proj = np.dot(d_ab, d_ap) / sqr_length
+
+        if vec_proj < 0:
+            return Position(a[0], a[1])
+        elif vec_proj > 1:
+            return Position(b[0], b[1])
+        else:
+            nearest_point = a + vec_proj * d_ab
+            return Position(nearest_point[0], nearest_point[1])
+
+
+    @staticmethod
+    def getZoneFromRole(role: Role):
+        if role == Role.GOALKEEPER:
+            return Zone.GOALKEEPER
+        elif role == Role.DEFENSIVE_LEFT:
+            return Zone.DEFENSIVE_LEFT
+        elif role == Role.DEFENSIVE_RIGHT:
+            return Zone.DEFENSIVE_RIGHT
+        elif role == Role.CENTER_LEFT:
+            return Zone.CENTER_LEFT
+        elif role == Role.CENTER_RIGHT:
+            return Zone.CENTER_RIGHT
+        elif role == Role.ATTACKING:
+            return Zone.ATTACKING
+        else:
+            raise ValueError("Invalid zone type. get ", role)
 
 ZoneManager()

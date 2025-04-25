@@ -7,3 +7,4 @@ from .kick import kick as KickAction
 from .faceToBall import faceToBall as FaceToBallAction
 from .aiming import aiming as AimingAction
 from .wait import wait as waitAction
+from .aimingToGoal import aimingToGoal as AimingToGoalAction

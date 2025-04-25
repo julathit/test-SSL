@@ -15,7 +15,7 @@ teams = ["blue", "yellow"]
 nor = 6
 # our team color
 our_team = "blue"
-# opponent_team = "yellow"
+opponent_team = "yellow"
 
 # need to implement
 [myteam]
