@@ -126,6 +126,10 @@ class Robot:
 
         return best_u, best_trajectory
 
+
+    def getRole(self) -> Role:
+        return self.role
+
     def getPosition(self) -> Position:
         return self.position
 

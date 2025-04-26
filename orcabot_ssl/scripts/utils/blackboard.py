@@ -6,6 +6,7 @@ from component.misc import Position, Role
 from component.robotEx import RobotDict, RobotList
 
 from utils.colors import Colors
+from typing import Tuple, List
 
 import traceback
 
@@ -41,9 +42,9 @@ class RobotBlackBoard():
             # cls._bb_manager.register_key(key="team_variable", access=Access.READ)
             # cls._bb_manager.team_variable = dict()
 
-            # cls._bb_manager.register_key(key="gamestate", access=Access.WRITE)
-            # cls._bb_manager.register_key(key="gamestate", access=Access.READ)
-            # cls._bb_manager.gamestate = dict()
+            cls._bb_manager.register_key(key="gamestate", access=Access.WRITE)
+            cls._bb_manager.register_key(key="gamestate", access=Access.READ)
+            cls._bb_manager.gamestate = dict()
 
         return super().__new__(cls)
 
@@ -52,13 +53,38 @@ class RobotBlackBoard():
         RobotBlackBoard._bb_param.parameters = config
         RobotBlackBoard.initConfig()
 
-    @staticmethod 
+    @staticmethod
     def initConfig():
         for team in RobotBlackBoard.getRobotDict().keys():
             for robot in RobotBlackBoard.getRobotList(team):
                 robot.nor = RobotBlackBoard.getConfig("match", "nor")
                 robot.team = RobotBlackBoard.getConfig("match", "our_team")
                 robot.updatePub()
+
+        RobotBlackBoard.initRole()
+        RobotBlackBoard._bb_manager.gamestate = {
+            "shooter_id": None,
+            "receive_shot_id": None,
+            "team_has_ball": None,
+            "opponent_has_ball": False,
+            "prev_ball_possesion": None,
+        }
+
+    @staticmethod
+    def initRole():
+        gollie = RobotBlackBoard.getConfig("myteam", "goallie_id")
+        RobotBlackBoard.getRobot(RobotBlackBoard.getMyTeam(), gollie).role = Role.GOALKEEPER
+
+        defenders = RobotBlackBoard.getConfig("myteam", "defender_id")
+        RobotBlackBoard.getRobot(RobotBlackBoard.getMyTeam(), defenders[0]).role = Role.DEFENSIVE_LEFT
+        RobotBlackBoard.getRobot(RobotBlackBoard.getMyTeam(), defenders[1]).role = Role.DEFENSIVE_RIGHT
+
+        centers = RobotBlackBoard.getConfig("myteam", "center_id")
+        RobotBlackBoard.getRobot(RobotBlackBoard.getMyTeam(), centers[0]).role = Role.CENTER_LEFT
+        RobotBlackBoard.getRobot(RobotBlackBoard.getMyTeam(), centers[1]).role = Role.CENTER_RIGHT
+
+        attacker = RobotBlackBoard.getConfig("myteam", "attacker_id")
+        RobotBlackBoard.getRobot(RobotBlackBoard.getMyTeam(), attacker).role = Role.ATTACKING
 
     @staticmethod
     def getConfig(*keys):
@@ -83,6 +109,10 @@ class RobotBlackBoard():
         return RobotBlackBoard.getConfig("match", "our_team")
 
     @staticmethod
+    def getOpTeam() -> str:
+        return RobotBlackBoard.getConfig("match", "opponent_team")
+
+    @staticmethod
     def printAllInfo() -> None:
         print(RobotBlackBoard._bb_manager)
         print(RobotBlackBoard._bb_param)
@@ -99,9 +129,9 @@ class RobotBlackBoard():
     def getRobotDict() -> RobotDict:
         return RobotBlackBoard._bb_manager.robots
 
-    # @staticmethod
-    # def getRobotRole(id: int) -> Role:
-    #     return RobotBlackBoard._bb_manager.robo
+    @staticmethod
+    def getRobotRole(id: int) -> Role:
+        return RobotBlackBoard.getRobot(RobotBlackBoard.getMyTeam(), id).role
 
     @staticmethod
     def getBallPosition() -> Position:
@@ -122,5 +152,58 @@ class RobotBlackBoard():
     def getRole(robot: Robot) -> Role:
         return robot.role
 
+# ===========================================================================================================
+# █▀█ █▀█ █▄▄ █▀█ ▀█▀   █▄▄ █▀▀ █░█ ▄▀█ █░█ █ █▀█ █▀█   █▀▀ █▀█ █▀▄▀█ █▀▄▀█ █░█ █▄░█ █ █▀▀ ▄▀█ ▀█▀ █ █▀█ █▄░█
+# █▀▄ █▄█ █▄█ █▄█ ░█░   █▄█ ██▄ █▀█ █▀█ ▀▄▀ █ █▄█ █▀▄   █▄▄ █▄█ █░▀░█ █░▀░█ █▄█ █░▀█ █ █▄▄ █▀█ ░█░ █ █▄█ █░▀█
+# ===========================================================================================================
+
+    @staticmethod
+    def getRobotShooterID() -> int:
+        shooter_id = RobotBlackBoard._bb_manager.gamestate["shooter_id"]
+        return RobotBlackBoard.getRobot(RobotBlackBoard.getMyTeam(), shooter_id).id if shooter_id != None else None
+
+    @staticmethod
+    def setRobotShooterID(rid: int) -> None:
+        RobotBlackBoard._bb_manager.gamestate["shooter_id"] = rid
+
+    @staticmethod
+    def getIsRobotReceiver(rid: int) -> Tuple[bool, int]:
+        receiver_id = RobotBlackBoard._bb_manager.gamestate["receive_shot_id"]
+        if receiver_id == None:
+            return (False, None)
+        return (receiver_id == rid, RobotBlackBoard.getRobotShooterID())
+
+    def setRobotReceiver(rid: int) -> None:
+        RobotBlackBoard._bb_manager.gamestate["receive_shot_id"] = rid
+
+    @staticmethod
+    def getBallPossession() -> int:
+        """
+        Returns the id of the robot that has possession of the ball.
+        If no robot has possession, returns None.
+        """
+        rid = RobotBlackBoard._bb_manager.gamestate["team_has_ball"]
+        if rid != None:
+            return rid
+        elif RobotBlackBoard._bb_manager.gamestate["opponent_has_ball"]:
+            return -1
+        else:
+            return None
+
+    @staticmethod
+    def getPreviousBallPossession() -> int:
+        """
+        Returns the id of the robot that had possession of the ball before the current one.
+        If no robot had possession, returns None.
+        """
+        rid = RobotBlackBoard._bb_manager.gamestate["prev_ball_possesion"]
+        if rid != None:
+            return rid
+        else:
+            return -99
+
+    @staticmethod
+    def setPreviousBallPossession(rid: int) -> None:
+        RobotBlackBoard._bb_manager.gamestate["prev_ball_possesion"] = rid
 
 RobotBlackBoard()

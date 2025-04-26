@@ -12,6 +12,8 @@ class aiming(Behaviour):
         self.ball_position = RBB.getBallPosition()
 
     def update(self):
+        RBB.setRobotReceiver(self.target_robot.id)
+        print("I somehow stuck at aiming!!")
         if self.robot.aiming(self.ball_position, self.target_robot.getPosition()) :
             return Status.SUCCESS
         else:
