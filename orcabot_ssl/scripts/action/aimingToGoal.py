@@ -12,6 +12,9 @@ class aimingToGoal(Behaviour):
         self.ball_position = RBB.getBallPosition()
 
     def update(self):
+        isInZone = ZoneManager.isInZone(RBB.getBallPosition(), ZoneManager.getZoneFromRole(self.robot.getRole()))
+        if not isInZone:
+            return Status.FAILURE
         if self.robot.aiming(self.ball_position, ZoneManager.getNearestPointOnGoalEntrance(self.ball_position, 100)) :
             return Status.SUCCESS
         else:

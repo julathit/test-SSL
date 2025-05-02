@@ -250,6 +250,9 @@ class Robot:
             self.RobotBlackBoard.getRobot(self.team, i).getPosition().to_list()
             for i in range(self.nor) if i != self.id
         ]
+        for i in range(6):
+            addYellowRobot = self.RobotBlackBoard.getRobot("yellow", i).getPosition().to_list()
+            obstacles.append(addYellowRobot)
         if avoidBall:
             obstacles.append(self.RobotBlackBoard.getBallPosition().to_list)
         x, y = self.getPosition().to_list()

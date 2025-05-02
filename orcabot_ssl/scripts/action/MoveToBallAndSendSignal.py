@@ -2,6 +2,7 @@ from py_trees.behaviour import Behaviour
 from py_trees.common import Status
 from component.robot import Robot
 from utils.blackboard import RobotBlackBoard as RBB
+from component.area import ZoneManager
 
 class MoveToBallAndSendSignal(Behaviour):
     def __init__(self, robot_ID: int, robot_target_ID: int):
@@ -11,7 +12,10 @@ class MoveToBallAndSendSignal(Behaviour):
 
     def update(self):
         RBB.setRobotReceiver(self.target_robot.id)
-        if self.robot.nearBall() != True:
+        isInZone = ZoneManager.isInZone(RBB.getBallPosition(), ZoneManager.getZoneFromRole(self.robot.getRole()))
+        if not isInZone:
+            return Status.FAILURE
+        elif self.robot.nearBall() != True:
             self.robot.MoveToBallModify()
             return Status.RUNNING
         else:

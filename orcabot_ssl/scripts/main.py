@@ -1,5 +1,6 @@
 #! /usr/bin/env python3
 from utils.orcabot import *
+from role import FielderAttackerBT, FielderGoalBT
 
 enable_debug()
 
@@ -41,6 +42,8 @@ def main():
     tree1 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 1)))
     tree2 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 2)))
     tree4 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 4)))
+    tree3 = py_trees.trees.BehaviourTree(FielderAttackerBT(RobotBlackBoard.getRobot("blue",3)))
+    tree5 = py_trees.trees.BehaviourTree(FielderGoalBT(RobotBlackBoard.getRobot("blue",5)))
     # tree5 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 5)))
 
     while True:
@@ -49,6 +52,8 @@ def main():
         tree1.tick()
         tree2.tick()
         tree4.tick()
+        tree3.tick()
+        tree5.tick()
         # updateRole()
     # else:
     #     print("Success.")

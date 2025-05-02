@@ -52,7 +52,7 @@ class FielderCenterRobotReceivePass(Sequence):
             FaceToBallAction(robot.id),
             # waitAction(robot.id, 7),
             # MoveToBallAction(robot.id),
-            DribblerAction(robot.id, 5)
+            DribblerAction(robot.id)
         ])
 
 # Shoot
