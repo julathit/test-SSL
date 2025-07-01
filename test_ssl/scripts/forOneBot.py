@@ -38,26 +38,20 @@ def main():
 
     # root: Sequence = Sequence(name = "test walk and kick", memory = True, children = [pre_root])
 
-    tree0 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 0)))
-    tree2 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 2)))
-    tree1 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 1)))
-    # tree4 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("yellow", 4)))
-    tree4 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 4)))
-    tree5 = py_trees.trees.BehaviourTree(FielderGoalBT(RobotBlackBoard.getRobot("blue", 5)))
-    tree3 = py_trees.trees.BehaviourTree(FielderAttackerBT(RobotBlackBoard.getRobot("blue",3)))
+    # tree0 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 0)))
+    # tree1 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 1)))
+    # tree2 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 2)))
+    # tree4 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 4)))
+    # tree3 = py_trees.trees.BehaviourTree(FielderAttackerBT(RobotBlackBoard.getRobot("blue",3)))
+    # tree5 = py_trees.trees.BehaviourTree(FielderGoalBT(RobotBlackBoard.getRobot("blue",5)))
+    robot0 = RobotBlackBoard.getRobot("blue",0)
+    robot1 = RobotBlackBoard.getRobot("blue",1)
     # tree5 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 5)))
 
     while True:
-        updateState()
-        # tree0.tick()
-        # tree1.tick()
-        tree1.tick()
-        # tree4.tick()
-        tree4.tick()
-        tree5.tick()  
-        tree0.tick()
-        tree2.tick()      
-        tree3.tick()
+        print("A")
+        robot0.MoveToPointWithPID(Position(1000,1000),-135)
+        robot1.MoveToBallPID()
 
         # updateRole()
     # else:
@@ -69,8 +63,5 @@ def main():
     #     print(RobotBlackBoard.getBallPossession())
     #     time.sleep(1)
 
-
-def updateRole():
-    for robot in RobotBlackBoard.getRobotList("blue"):
-        print(robot.getRole())
-        pass
+if __name__ == "__main__":
+    main()

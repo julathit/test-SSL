@@ -1,0 +1,10 @@
+from .MoveToBall import MoveToBall as MoveToBallAction
+from .MoveToPoint import MoveToPoint as MoveToPointAction
+from .MoveToRandomPoint import MoveToRandomPoint as MoveToRandomPointAction
+from .GoToLineUp import GoToLineUp as GoToLineUpAction
+from .dribbler import dribbler as DribblerAction
+from .kick import kick as KickAction
+from .faceToBall import faceToBall as FaceToBallAction
+from .aiming import aiming as AimingAction
+from .wait import wait as waitAction
+from .aimingToGoal import aimingToGoal as AimingToGoalAction

@@ -39,26 +39,21 @@ def main():
     # root: Sequence = Sequence(name = "test walk and kick", memory = True, children = [pre_root])
 
     tree0 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 0)))
-    tree2 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 2)))
-    tree1 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 1)))
-    # tree4 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("yellow", 4)))
+    tree1 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 1)))
+    tree2 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 2)))
     tree4 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 4)))
-    tree5 = py_trees.trees.BehaviourTree(FielderGoalBT(RobotBlackBoard.getRobot("blue", 5)))
     tree3 = py_trees.trees.BehaviourTree(FielderAttackerBT(RobotBlackBoard.getRobot("blue",3)))
+    tree5 = py_trees.trees.BehaviourTree(FielderGoalBT(RobotBlackBoard.getRobot("blue",5)))
     # tree5 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 5)))
 
     while True:
         updateState()
-        # tree0.tick()
-        # tree1.tick()
-        tree1.tick()
-        # tree4.tick()
-        tree4.tick()
-        tree5.tick()  
         tree0.tick()
-        tree2.tick()      
+        tree1.tick()
+        tree2.tick()
+        tree4.tick()
         tree3.tick()
-
+        tree5.tick()
         # updateRole()
     # else:
     #     print("Success.")

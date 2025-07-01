@@ -41,11 +41,12 @@ def main():
     tree0 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 0)))
     tree2 = py_trees.trees.BehaviourTree(CentralBT(RobotBlackBoard.getRobot("blue", 2)))
     tree1 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 1)))
-    # tree4 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("yellow", 4)))
     tree4 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 4)))
     tree5 = py_trees.trees.BehaviourTree(FielderGoalBT(RobotBlackBoard.getRobot("blue", 5)))
     tree3 = py_trees.trees.BehaviourTree(FielderAttackerBT(RobotBlackBoard.getRobot("blue",3)))
     # tree5 = py_trees.trees.BehaviourTree(FielderDefenderBT(RobotBlackBoard.getRobot("blue", 5)))
+
+
 
     while True:
         updateState()
